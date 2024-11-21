@@ -129,7 +129,8 @@ read_loop:
     stb r12, 0(r4)                   # Salvar o dado no buffer
     addi r4, r4, 1                   # Avançar no buffer
     subi r5, r5, 1                   # Reduzir o contador de caracteres restantes
-    beq r12, 0x0A, read_end          # Se o caractere for ENTER, encerrar
+    movi r13, 0x0A                   # Carregar o valor 0x0A (ENTER)
+    beq r12, r13, read_end           # Se o caractere for ENTER, encerrar
     bne r5, r0, read_loop            # Continuar lendo até o limite
 read_end:
     stb r0, 0(r4)                    # Adicionar null terminator no buffer
