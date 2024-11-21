@@ -136,6 +136,7 @@ read_end:
     stb r0, 0(r4)                    # Adicionar null terminator no buffer
     ret                              # Retornar
 
+
 # Dados para mensagem inicial e buffer
 .org 0x300
 CMD_BUFFER:
