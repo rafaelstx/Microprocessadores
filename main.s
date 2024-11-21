@@ -29,6 +29,11 @@ _start:
     movi r10, 7                      # Ativar o TIMER (ITO, CONT)
     stwio r10, 4(r8)                 # Escrever no registrador de controle do TIMER
 
+    # Configurar botões (PUSHBUTTON_REG)
+    movia r8, PUSHBUTTON_REG         # Carregar o endereço do registro de botões
+    movi r9, 6                       # Configurar interrupção para o botão (ITO, CONT)
+    stwio r9, 8(r8)                  # Escrever no registrador de controle dos botões
+
     # Imprimir mensagem inicial para o usuário
     call print_message
 
@@ -45,6 +50,11 @@ print_message:
     movia r4, INIT_MSG               # Carregar a mensagem inicial na memória
     call uart_write_string           # Chamar função para escrever a string no UART
     ret                              # Retornar
+
+# Função para tratar botões
+button_handler:
+    call button_control              # Chamar função de controle dos botões
+    ret                              # Retornar ao loop principal
 
 # Função para ler o comando via UART
 read_uart:
@@ -65,7 +75,7 @@ process_command:
     bne r10, r0, check_animation     # Se r9 não for igual a '0', verificar o próximo
 
     # Comando de LED
-    call cmd_led
+    call led_control
     br main_loop                     # Retornar ao loop principal
 
 check_animation:
@@ -74,7 +84,7 @@ check_animation:
     bne r10, r0, check_timer         # Se r9 não for igual a '1', verificar o próximo
 
     # Comando de Animação
-    call cmd_animation
+    call animation_control
     br main_loop                     # Retornar ao loop principal
 
 check_timer:
@@ -83,24 +93,12 @@ check_timer:
     bne r10, r0, invalid_command     # Se r9 não for igual a '2', comando inválido
 
     # Comando de Cronômetro
-    call cmd_timer
+    call timer_control
     br main_loop                     # Retornar ao loop principal
 
 invalid_command:
     # Se o comando for inválido, reiniciar o loop principal
     br main_loop
-
-cmd_led:
-    call led_control                 # Chamar a função para controlar LEDs
-    ret                              # Retornar ao loop principal
-
-cmd_animation:
-    call animation_control           # Chamar a função para animações
-    ret                              # Retornar ao loop principal
-
-cmd_timer:
-    call timer_control               # Chamar a função para o cronômetro
-    ret                              # Retornar ao loop principal
 
 # Funções UART
 
@@ -135,7 +133,6 @@ read_loop:
 read_end:
     stb r0, 0(r4)                    # Adicionar null terminator no buffer
     ret                              # Retornar
-
 
 # Dados para mensagem inicial e buffer
 .org 0x300
